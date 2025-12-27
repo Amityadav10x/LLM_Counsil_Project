@@ -15,29 +15,6 @@ A final decision is produced with confidence, risks, and citations
 
 All steps are safety-gated and audit-logged
 
-🏗️ Architecture Overview
-User Prompt
-     |
-     v
-[Input Safety Gate]
-     |
-     v
-+---------------------+
-|  Answer Agents (3)  |
-|  A | B | C          |
-+---------------------+
-     |
-     v
-+---------------------+
-|   Judges (2)        |
-|   Compare Only      |
-+---------------------+
-     |
-     v
-[Decision Object]
-     |
-     v
-[Audit Log (JSONL)]
 
 🤖 Agent Design
 Answer Agents (3)
