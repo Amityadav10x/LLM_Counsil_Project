@@ -1,0 +1,649 @@
+{
+  "name": "LLM Cousil",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        128
+      ],
+      "id": "72113d49-a497-4d91-b264-49eca3083872",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4b573a18-ca0f-41af-a34e-f8e4e8d50e5c",
+              "name": "prompt",
+              "value": "Explain the benefits of solar energy",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -352,
+        -80
+      ],
+      "id": "19a4108f-fd29-43d3-b671-b1587c916b2f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "93af9458-0b2a-4c83-b809-e76849514ef0",
+              "leftValue": "={{$json.prompt.length}}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -144,
+        -80
+      ],
+      "id": "f5e8df80-d9f6-41f5-9566-d32c3062b4ac",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"prompt\": \"Explain the benefits of solar energy\",\n  \"agents\": [\n    { \"id\": \"A\", \"system\": \"Be factual and concise\" },\n    { \"id\": \"B\", \"system\": \"Be analytical and detailed\" },\n    { \"id\": \"C\", \"system\": \"Be cautious and risk-aware\" }\n  ]\n}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        -192
+      ],
+      "id": "43b88217-a390-4ba6-a472-3825875601cb",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "agents",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        272,
+        -192
+      ],
+      "id": "09c61965-c026-4451-ab11-2b674049541b",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer "
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sonar\",\n  \"stream\": false,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"{{$json.system}}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{$json.prompt}}\"\n    }\n  ],\n  \"temperature\": 0.7\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        720,
+        -96
+      ],
+      "id": "a32f100f-f399-483f-915e-bf66a230fa57",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fa9e801b-dee9-48e7-82b2-40fd01d57bcc",
+              "name": "agent_id",
+              "value": "={{ $json.agent_id }}",
+              "type": "string"
+            },
+            {
+              "id": "dadace25-3f39-49e7-9cfd-3aee7b7e43b8",
+              "name": "text",
+              "value": "={{$json.id}}",
+              "type": "string"
+            },
+            {
+              "id": "ecc1e257-445d-4a2b-a7d3-4f6c3a9673c6",
+              "name": "citations",
+              "value": "={{$json.choices[0].message.content}}",
+              "type": "string"
+            },
+            {
+              "id": "adeeb652-4e1b-43c7-9369-d0a32338edcd",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        -176
+      ],
+      "id": "b664cb90-c08b-487d-b869-5c00e5e2e928",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"agent_id\": \"{{ $json.agents.id }}\",\n  \"system\": \"{{ $json.agents.system }}\",\n  \"prompt\": \"{{ $json.agents.system }}\"\n}\n",
+        "includeOtherFields": "={{ false }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        -192
+      ],
+      "id": "d7bf536b-9d3f-4ed6-8a7f-b0f18df12024",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        928,
+        -176
+      ],
+      "id": "c5272b19-1c19-4d28-813b-b5ab09b7c4a4",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "function cleanCitations(text) {\n  if (!text || typeof text !== \"string\") return \"\";\n\n  return text\n    // Remove citation markers like [1], [12]\n    .replace(/\\[\\d+\\]/g, \"\")\n\n    // Remove markdown bold/italic\n    .replace(/\\*\\*/g, \"\")\n\n    // Remove markdown headers ### ##\n    .replace(/#{1,6}\\s*/g, \"\")\n\n    // Remove bullet points\n    .replace(/^\\s*[-•]\\s*/gm, \"\")\n\n    // Remove table pipes\n    .replace(/\\|/g, \" \")\n\n    // Remove UUIDs if present\n    .replace(/\\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\b/gi, \"\")\n\n    // Remove extra symbols\n    .replace(/[_~`^]/g, \"\")\n\n    // Normalize newlines\n    .replace(/\\n+/g, \"\\n\")\n\n    // Normalize spaces\n    .replace(/\\s+/g, \" \")\n\n    // Trim\n    .trim();\n}\n\nreturn items.map(item => ({\n  json: {\n    agent_id: item.json.agent_id,\n\n    // KEEP TEXT AS-IS\n    text: item.json.text,\n\n    // CLEAN ONLY CITATIONS\n    citations: cleanCitations(item.json.citations)\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        -176
+      ],
+      "id": "5631867c-1061-4b7f-8d6d-f0c508e1a8e2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        -96
+      ],
+      "id": "e25e48f7-44f5-4acc-a45e-b84945540e0c",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "=",
+        "body": "={{    JSON.stringify({     model: \"sonar\",     stream: false,     messages: [       {         role: \"system\",         content: \"You are a judge. Do NOT answer the question. Compare answers and respond ONLY in valid JSON.\"       },       {         role: \"user\",         content: $json.judge_prompt       }     ],     temperature: 0   })  }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1056,
+        144
+      ],
+      "id": "c984be1d-0eff-4b99-b1fe-0971d57e4c76",
+      "name": "Judge 1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nreturn [\n  {\n    json: {\n      prompt: \"Explain the benefits of solar energy\",\n      answers: $json.data.map(item => ({\n        agent_id: item.agent_id,\n        text: item.citations.trim()\n      }))\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        240
+      ],
+      "id": "33e1b03b-3e78-47ef-ad65-60a1d61ef877",
+      "name": "Clean Anawer"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prompt = $json.prompt;\nconst answers = $json.answers;\n\nlet judgePrompt = `Question:\\n${prompt}\\n\\n`;\n\nanswers.forEach(a => {\n  judgePrompt += `Answer ${a.agent_id}:\\n${a.text}\\n\\n`;\n});\n\njudgePrompt += `\nRubric:\nAccuracy (0-5)\nCompleteness (0-5)\nClarity (0-5)\nRisk (0-5)\n\nRespond ONLY in valid JSON like this:\n{\n  \"selected\": \"A|B|C\",\n  \"risks\": []\n}\n`;\n\nreturn [\n  {\n    json: {\n      judge_prompt: judgePrompt\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        240
+      ],
+      "id": "a0c8c785-b18c-4e09-a405-051ab804b1a5",
+      "name": "Prepare prompt"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = items[0].json.choices[0].message.content;\n\nlet parsed;\ntry {\n  parsed = JSON.parse(content);\n} catch (e) {\n  parsed = { selected: \"error\", risks: [\"Invalid JSON from judge\"] };\n}\n\nreturn [{\n  json: {\n    judge: \"judge_1\",\n    selected: parsed.selected,\n    risks: parsed.risks\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        144
+      ],
+      "id": "db4e846f-9d80-4ce8-ae77-566cee0179fa",
+      "name": "Judge output"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={{ JSON.stringify({   model: \"sonar\",   stream: false,   messages: [     {       role: \"system\",       content: \"You are Judge 2. Evaluate answers for factual accuracy and real-world relevance. Respond ONLY in valid JSON.\"     },     {       role: \"user\",       content: $json.judge_prompt     }   ],   temperature: 0 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1056,
+        336
+      ],
+      "id": "0d00f6c3-a2b0-4d13-b5dd-c8b0ddd0d577",
+      "name": "Judge 2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract raw JSON string from Judge 2 response\nconst rawContent = items[0].json.choices[0].message.content;\n\nlet parsed;\ntry {\n  parsed = JSON.parse(rawContent);\n} catch (error) {\n  parsed = {\n    selected: \"error\",\n    risks: [\"Judge 2 returned invalid JSON\"]\n  };\n}\n\n// Normalize casing (important)\nconst selected =\n  typeof parsed.selected === \"string\"\n    ? parsed.selected.toLowerCase()\n    : \"error\";\n\nreturn [\n  {\n    json: {\n      judge: \"judge_2\",\n      selected: selected,\n      risks: parsed.risks || []\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        336
+      ],
+      "id": "2b4cc7a9-a606-4cd0-b98f-3f6755882a70",
+      "name": "Judge 2 Output"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1632,
+        208
+      ],
+      "id": "c45cbb89-bcd6-401b-9cd5-51987e06015c",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "11097f22-8142-44ed-b0fa-b459850bfb4e",
+              "name": "judge_prompt",
+              "value": "={{$json.judge_prompt}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        736,
+        240
+      ],
+      "id": "de8a2992-7168-4645-83a8-86186644851f",
+      "name": "Clone for Judges"
+    },
+    {
+      "parameters": {
+        "jsCode": "const votes = {};\nconst allRisks = [];\n\nfor (const item of items) {\n  const sel = item.json.selected;\n\n  if (sel && sel !== \"none\" && sel !== \"error\") {\n    votes[sel] = (votes[sel] || 0) + 1;\n  }\n\n  if (Array.isArray(item.json.risks)) {\n    allRisks.push(...item.json.risks);\n  }\n}\n\nconst sorted = Object.entries(votes).sort((a, b) => b[1] - a[1]);\nconst decision = sorted.length ? sorted[0][0] : \"none\";\nconst confidence = sorted.length ? sorted[0][1] / items.length : 0;\n\nreturn [{\n  json: {\n    decision,\n    confidence,\n    risks: allRisks\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        208
+      ],
+      "id": "49926607-8329-4faf-9ae6-03d09509beab",
+      "name": "Final Decision Reducer"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        240
+      ],
+      "id": "8af4e363-69f0-46f7-a308-565462d51e5c",
+      "name": "Edit Fields4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Clean Anawer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Anawer": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare prompt": {
+      "main": [
+        [
+          {
+            "node": "Clone for Judges",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Judge 1": {
+      "main": [
+        [
+          {
+            "node": "Judge output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Judge 2": {
+      "main": [
+        [
+          {
+            "node": "Judge 2 Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Judge 2 Output": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Judge output": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clone for Judges": {
+      "main": [
+        [
+          {
+            "node": "Judge 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Judge 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Final Decision Reducer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Decision Reducer": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Prepare prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "968f09b6-5bfb-4668-94ec-2888f64c94b3",
+  "meta": {
+    "instanceId": "fd4066d0f3eecb74ce6ea590c07e3e18bbf3146e3818c6effad8d6451bc66ec5"
+  },
+  "id": "le8Kn4BWqPyalIUH",
+  "tags": []
+}
