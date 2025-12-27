@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=42","wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-counsil"
+version = "0.0.1"
+description = "LLM Counsil project"
+authors = ["Your Name <you@example.com>"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-q"
+testpaths = ["tests"]
